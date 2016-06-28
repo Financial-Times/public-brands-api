@@ -1,0 +1,11 @@
+{
+  "uuid": "d851e146-e889-43f3-8f4c-269da9bb0298",
+  "prefLabel": "parentBrand",
+  "strapline": "Keeping it in the family",
+  "description": "This brand has is a parent",
+  "descriptionXML": "<body>This brand has is a parent</body>",
+  "_imageUrl": "http://media.ft.com/parentBrand.png",
+  "alternativeIdentifiers": {
+    "uuids": ["d851e146-e889-43f3-8f4c-269da9bb0298"]
+    }
+}

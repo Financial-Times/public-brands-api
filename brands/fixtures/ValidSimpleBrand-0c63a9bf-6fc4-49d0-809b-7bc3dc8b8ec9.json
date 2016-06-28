@@ -1,0 +1,12 @@
+{
+  "uuid": "0c63a9bf-6fc4-49d0-809b-7bc3dc8b8ec9",
+  "prefLabel": "validSimpleBrand",
+  "strapline": "Keeping it simple",
+  "description": "This brand has no parent but otherwise has valid values for all fields",
+  "descriptionXML": "<body>This <i>brand</i> has no parent but otherwise has valid values for all fields</body>",
+  "_imageUrl": "http://media.ft.com/validSimpleBrand.png",
+  "alternativeIdentifiers": {
+    "uuids": ["0c63a9bf-6fc4-49d0-809b-7bc3dc8b8ec9"],
+    "TME": ["tme1"]
+    }
+}
