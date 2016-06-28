@@ -3,13 +3,13 @@ package brands
 import (
 	"encoding/json"
 	"fmt"
-	"os"
-	"testing"
 	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
 	"github.com/Financial-Times/brands-rw-neo4j/brands"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
 	"github.com/jmcvetta/neoism"
 	"github.com/stretchr/testify/assert"
+	"os"
+	"testing"
 )
 
 var validSimpleBrand = brands.Brand{
@@ -138,7 +138,6 @@ func cleanUp(uuid string, t *testing.T) {
 	assert.True(t, found, "Unable to delete brand with uuid %s", uuid)
 	assert.NoError(t, err, "Error deleting brand with uuid %s", uuid)
 }
-
 
 func writeJSONToService(service baseftrwapp.Service, pathToJSONFile string, assert *assert.Assertions) {
 	f, err := os.Open(pathToJSONFile)
