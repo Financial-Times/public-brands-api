@@ -1,0 +1,12 @@
+{
+  "uuid": "a806e270-edbc-423f-b8db-d21ae90e06c8",
+  "parentUUID": "d851e146-e889-43f3-8f4c-269da9bb0298",
+  "prefLabel": "childBrand1",
+  "strapline": "I live in one family",
+  "description": "This brand has a parent and valid values for all fields",
+  "descriptionXML": "<body>This <i>brand</i> has a parent and valid values for all fields</body>",
+  "_imageUrl": "http://media.ft.com/childBrand1.png",
+  "alternativeIdentifiers": {
+    "uuids": ["a806e270-edbc-423f-b8db-d21ae90e06c8"]
+    }
+}

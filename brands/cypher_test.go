@@ -1,16 +1,15 @@
 package brands
 
 import (
-	//"encoding/json"
+	"encoding/json"
 	"fmt"
-	"os"
-	"testing"
-
 	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
 	"github.com/Financial-Times/brands-rw-neo4j/brands"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
 	"github.com/jmcvetta/neoism"
 	"github.com/stretchr/testify/assert"
+	"os"
+	"testing"
 )
 
 var validSimpleBrand = brands.Brand{
@@ -22,11 +21,6 @@ var validSimpleBrand = brands.Brand{
 	ImageURL:       "http://media.ft.com/validSimpleBrand.png",
 }
 
-var grandDaddy = brands.Brand{
-	UUID:      "d05b48ae-933e-4b2f-afcb-99b19bdceaf3",
-	PrefLabel: "The daddy of all brands",
-}
-
 var parentBrand = brands.Brand{
 	UUID:           "d851e146-e889-43f3-8f4c-269da9bb0298",
 	PrefLabel:      "parentBrand",
@@ -36,7 +30,7 @@ var parentBrand = brands.Brand{
 	ImageURL:       "http://media.ft.com/parentBrand.png",
 }
 
-var childBrand1 = brands.Brand{
+var childBrand = brands.Brand{
 	UUID:           "a806e270-edbc-423f-b8db-d21ae90e06c8",
 	ParentUUID:     "d851e146-e889-43f3-8f4c-269da9bb0298",
 	PrefLabel:      "childBrand1",
@@ -47,19 +41,22 @@ var childBrand1 = brands.Brand{
 }
 
 func TestSimpleBrand(t *testing.T) {
-	err := getBrandRWDriver(t).Write(validSimpleBrand)
-	assert.NoError(t, err)
+	assert := assert.New(t)
+	brandsWriter := getBrandRWDriver(t)
+	writeJSONToService(brandsWriter, "./fixtures/ValidSimpleBrand-0c63a9bf-6fc4-49d0-809b-7bc3dc8b8ec9.json", assert)
 	readAndCompare(&validSimpleBrand, nil, nil, t)
 	cleanUp(validSimpleBrand.UUID, t)
 }
 
 func TestSimpleBrandAsParent(t *testing.T) {
-	err := getBrandRWDriver(t).Write(parentBrand)
-	assert.NoError(t, err)
-	err = getBrandRWDriver(t).Write(childBrand1)
-	assert.NoError(t, err)
-	readAndCompare(&childBrand1, &parentBrand, nil, t)
-	cleanUp(childBrand1.UUID, t)
+	assert := assert.New(t)
+
+	brandsWriter := getBrandRWDriver(t)
+	writeJSONToService(brandsWriter, "./fixtures/ParentBrand-d851e146-e889-43f3-8f4c-269da9bb0298.json", assert)
+	writeJSONToService(brandsWriter, "./fixtures/ChildBrand-a806e270-edbc-423f-b8db-d21ae90e06c8.json", assert)
+
+	readAndCompare(&childBrand, &parentBrand, nil, t)
+	cleanUp(childBrand.UUID, t)
 	cleanUp(parentBrand.UUID, t)
 }
 
@@ -140,4 +137,14 @@ func cleanUp(uuid string, t *testing.T) {
 	found, err := getBrandRWDriver(t).Delete(uuid)
 	assert.True(t, found, "Unable to delete brand with uuid %s", uuid)
 	assert.NoError(t, err, "Error deleting brand with uuid %s", uuid)
+}
+
+func writeJSONToService(service baseftrwapp.Service, pathToJSONFile string, assert *assert.Assertions) {
+	f, err := os.Open(pathToJSONFile)
+	assert.NoError(err)
+	dec := json.NewDecoder(f)
+	inst, _, errr := service.DecodeJSON(dec)
+	assert.NoError(errr)
+	errrr := service.Write(inst)
+	assert.NoError(errrr)
 }

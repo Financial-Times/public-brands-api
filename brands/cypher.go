@@ -46,7 +46,7 @@ func (driver CypherDriver) Read(uuid string) (brand Brand, found bool, err error
 
 	query := &neoism.CypherQuery{
 		Statement: `
-                        MATCH (b:Brand{uuid:{uuid}})
+                        MATCH (upp:UPPIdentifier{value:{uuid}})-[:IDENTIFIES]->(b:Brand)
                         OPTIONAL MATCH (b)-[:HAS_PARENT]->(p:Thing)
                         OPTIONAL MATCH (b)<-[:HAS_PARENT]-(c:Thing)
                         RETURN  b.uuid as id, labels(b) as types, b.prefLabel as prefLabel,
