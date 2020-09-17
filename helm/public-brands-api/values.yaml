@@ -13,7 +13,7 @@ env:
   app:
     port: "8080"
   cache:
-    duration: "168h" #one week
+    duration: "5m" #one week
 resources:
   limits:
     memory: 128Mi
