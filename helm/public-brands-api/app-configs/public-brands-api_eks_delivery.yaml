@@ -2,4 +2,3 @@
 replicaCount: 2
 service:
   name: public-brands-api
-eksCluster: true
