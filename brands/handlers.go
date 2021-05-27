@@ -179,6 +179,8 @@ func (h *BrandsHandler) getBrandViaConceptsAPI(UUID string, transID string) (bra
 		logger.WithError(err).WithUUID(UUID).WithTransactionID(transID).Error(msg)
 		return mappedBrand, "", false, err
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode == http.StatusNotFound {
 		return mappedBrand, "", false, nil
 	}
