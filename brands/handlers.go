@@ -34,12 +34,16 @@ const (
 )
 
 type BrandsHandler struct {
+	systemCode  string
+	appName     string
 	client      httpClient
 	conceptsURL string
 }
 
-func NewHandler(client httpClient, conceptsURL string) BrandsHandler {
+func NewHandler(client httpClient, appName, systemCode, conceptsURL string) BrandsHandler {
 	return BrandsHandler{
+		appName:     appName,
+		systemCode:  systemCode,
 		client:      client,
 		conceptsURL: conceptsURL,
 	}
@@ -72,7 +76,7 @@ func (h *BrandsHandler) HealthCheck() fthealth.Check {
 		ID:               "public-concepts-api-check",
 		BusinessImpact:   "Unable to respond to Public Brands api requests",
 		Name:             "Check connectivity to public-concepts-api",
-		PanicGuide:       "https://runbooks.in.ft.com/public-brands-api",
+		PanicGuide:       "https://runbooks.ftops.tech/" + h.systemCode,
 		Severity:         2,
 		TechnicalSummary: "Not being able to communicate with public-concepts-api means that requests for organisations cannot be performed.",
 		Checker:          h.Checker,

@@ -2,3 +2,4 @@
 replicaCount: 2
 service:
   name: public-brands-api
+  systemCode: public-brands-api
