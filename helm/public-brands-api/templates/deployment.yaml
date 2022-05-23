@@ -39,6 +39,10 @@ spec:
             configMapKeyRef:
               name: global-config
               key: neo4j.read.only.url
+        - name: APP_NAME
+          value: {{ .Values.service.name }}
+        - name: APP_SYSTEM_CODE
+          value: {{ .Values.service.systemCode }}
         - name: CACHE_DURATION
           value: {{ .Values.env.cache.duration }}
         - name: CONCEPTS_API

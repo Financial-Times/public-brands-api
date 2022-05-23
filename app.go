@@ -15,7 +15,7 @@ import (
 	"github.com/Financial-Times/public-brands-api/v4/brands"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 	"github.com/gorilla/mux"
-	"github.com/jawher/mow.cli"
+	cli "github.com/jawher/mow.cli"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rcrowley/go-metrics"
 )
@@ -38,7 +38,12 @@ func main() {
 		Desc:   "System Code of the application",
 		EnvVar: "APP_SYSTEM_CODE",
 	})
-	env := app.StringOpt("env", "local", "environment this app is running in")
+	appName := app.String(cli.StringOpt{
+		Name:   "appName",
+		Value:  "public-brands-api",
+		Desc:   "Name of the service",
+		EnvVar: "APP_NAME",
+	})
 	neoURL := app.String(cli.StringOpt{
 		Name:   "neo-url",
 		Value:  "http://localhost:7474/db/data",
@@ -78,7 +83,7 @@ func main() {
 
 	app.Action = func() {
 		log.Infof("public-brands-api will listen on port: %s, connecting to: %s", *port, *neoURL)
-		runServer(*neoURL, *port, *cacheDuration, *env, *conceptsApiUrl)
+		runServer(*appName, *port, *appSystemCode, *cacheDuration, *conceptsApiUrl)
 	}
 
 	log.InitLogger(*appSystemCode, *logLevel)
@@ -92,8 +97,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func runServer(neoURL string, port string, cacheDuration string, env string, conceptsApiUrl string) {
-
+func runServer(appName string, port string, systemCode string, cacheDuration string, conceptsAPIURL string) {
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
 		log.Fatalf("Failed to parse cache duration string, %v", durationErr)
 	} else {
@@ -102,12 +106,12 @@ func runServer(neoURL string, port string, cacheDuration string, env string, con
 
 	servicesRouter := mux.NewRouter()
 
-	handler := brands.NewHandler(&httpClient, conceptsApiUrl)
+	handler := brands.NewHandler(&httpClient, appName, systemCode, conceptsAPIURL)
 
 	// Healthchecks and standards first
 	healthCheck := fthealth.TimedHealthCheck{
 		HealthCheck: fthealth.HealthCheck{
-			SystemCode:  "public-brand-api",
+			SystemCode:  systemCode,
 			Name:        "PublicBrandsRead Healthcheck",
 			Description: "Checks downstream services health",
 			Checks:      []fthealth.Check{handler.HealthCheck()},

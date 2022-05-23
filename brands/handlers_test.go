@@ -3,14 +3,15 @@ package brands
 import (
 	"bytes"
 	"errors"
-	"github.com/Financial-Times/go-logger"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/Financial-Times/go-logger"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHandlers(t *testing.T) {
@@ -105,7 +106,7 @@ func TestHandlers(t *testing.T) {
 		mockClient.resp = test.clientBody
 		mockClient.statusCode = test.clientCode
 		mockClient.err = test.clientError
-		bh := NewHandler(&mockClient, "localhost:8080/concepts")
+		bh := NewHandler(&mockClient, "localhost:8080/concepts", "public-brands-api", "public-brands-api")
 		bh.RegisterHandlers(router)
 
 		rr := httptest.NewRecorder()
