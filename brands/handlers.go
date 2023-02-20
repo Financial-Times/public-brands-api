@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	ontology "github.com/Financial-Times/cm-graph-ontology"
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	logger "github.com/Financial-Times/go-logger"
-	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	"github.com/Financial-Times/service-status-go/gtg"
 	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
 	"github.com/gorilla/handlers"
@@ -150,7 +150,7 @@ func (h *BrandsHandler) GetBrand(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//GoodToGo returns a 503 if the healthcheck fails - suitable for use from varnish to check availability of a node
+// GoodToGo returns a 503 if the healthcheck fails - suitable for use from varnish to check availability of a node
 func (h *BrandsHandler) GTG() gtg.Status {
 	statusCheck := func() gtg.Status {
 		return gtgCheck(h.Checker)
@@ -207,11 +207,17 @@ func (h *BrandsHandler) getBrandViaConceptsAPI(UUID string, transID string) (bra
 		return mappedBrand, "", false, nil
 	}
 
+	types, err := ontology.FullTypeHierarchy(conceptsApiResponse.Type)
+	if err != nil {
+		err = fmt.Errorf("getting %s type hierarchy: %w", conceptsApiResponse.Type, err)
+		return mappedBrand, "", false, err
+	}
+
 	mappedBrand.ID = convertID(conceptsApiResponse.ID)
 	mappedBrand.APIURL = convertApiUrl(conceptsApiResponse.ApiURL)
 	mappedBrand.PrefLabel = conceptsApiResponse.PrefLabel
 	mappedBrand.IsDeprecated = conceptsApiResponse.IsDeprecated
-	mappedBrand.Types = mapper.FullTypeHierarchy(conceptsApiResponse.Type)
+	mappedBrand.Types = types
 	mappedBrand.DirectType = conceptsApiResponse.Type
 	mappedBrand.ImageURL = conceptsApiResponse.ImageURL
 	mappedBrand.DescriptionXML = conceptsApiResponse.DescriptionXML
@@ -219,26 +225,41 @@ func (h *BrandsHandler) getBrandViaConceptsAPI(UUID string, transID string) (bra
 
 	for _, broader := range conceptsApiResponse.Broader {
 		if broader.Concept.Type == brandOntology {
-			mappedBrand.Parent = convertRelationship(broader)
+			parent, err := convertRelationship(broader)
+			if err != nil {
+				return Brand{}, "", false, err
+			}
+
+			mappedBrand.Parent = parent
 			break
 		}
 	}
 	var children []Thing
 	for _, narrower := range conceptsApiResponse.Narrower {
-		children = append(children, *convertRelationship(narrower))
+		child, err := convertRelationship(narrower)
+		if err != nil {
+			return Brand{}, "", false, err
+		}
+
+		children = append(children, *child)
 	}
 	mappedBrand.Children = children
 	return mappedBrand, strings.TrimPrefix(mappedBrand.ID, thingsApiUrl), true, nil
 }
 
-func convertRelationship(rc RelatedConcept) *Thing {
+func convertRelationship(rc RelatedConcept) (*Thing, error) {
+	types, err := ontology.FullTypeHierarchy(rc.Concept.Type)
+	if err != nil {
+		return nil, fmt.Errorf("getting %s type hierarchy: %w", rc.Concept.Type, err)
+	}
+
 	return &Thing{
 		ID:         convertID(rc.Concept.ID),
 		APIURL:     convertApiUrl(rc.Concept.ApiURL),
-		Types:      mapper.FullTypeHierarchy(rc.Concept.Type),
+		Types:      types,
 		DirectType: rc.Concept.Type,
 		PrefLabel:  rc.Concept.PrefLabel,
-	}
+	}, nil
 }
 
 func convertApiUrl(conceptsApiUrl string) string {
