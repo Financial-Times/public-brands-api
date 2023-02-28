@@ -18,6 +18,12 @@ jobs:
           name: Load ersatz-fixtures.yml to ersatz image
           command: "curl -X POST --data-binary @_ft/ersatz-fixtures.yml -H \"Content-type: text/x-yaml\" http://localhost:9000/__configure"
       - run:
+          name: Set git url
+          command: |
+            git config --global --unset url."ssh://git@github.com".insteadOf
+            export GOPRIVATE="github.com/Financial-Times"
+            git config --global url."https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com".insteadOf "https://github.com"
+      - run:
           name: Go Build
           command: go build -mod=readonly -v
       - run:
@@ -37,13 +43,22 @@ workflows:
       - ft-golang-ci/build-and-test:
           name: build-and-test-project
           executor-name: ft-golang-ci/default-with-neo4j
-      - dredd    
+          context:
+            - cm-team-github
+      - dredd:
+          name: dredd
+          context:
+            - cm-team-github
       - ft-golang-ci/docker-build:
           name: build-docker-image
           requires:
             - build-and-test-project
+          context:
+            - cm-team-github
   snyk-scanning:
     jobs:
       - ft-golang-ci/scan:
           name: scan-dependencies
-          context: cm-team-snyk
+          context:
+            - cm-team-snyk
+            - cm-team-github
